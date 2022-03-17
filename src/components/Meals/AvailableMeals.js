@@ -2,50 +2,55 @@ import MealItem from "./MealItem";
 
 import Card from "../UI/Card";
 import classes from "./AvailableMeals.module.css";
+import { useEffect } from "react";
+import useHttp from "../../hooks/use-http";
 
-//db와 연결 없이 진행하기 때문에, dummy data 필요.
-const DUMMY_MEALS = [
-  {
-    id: "m1",
-    name: "Sushi",
-    description: "Finest fish and veggies",
-    price: 22.99,
-  },
-  {
-    id: "m2",
-    name: "Schnitzel",
-    description: "A german specialty!",
-    price: 16.5,
-  },
-  {
-    id: "m3",
-    name: "Barbecue Burger",
-    description: "American, raw, meaty",
-    price: 12.99,
-  },
-  {
-    id: "m4",
-    name: "Green Bowl",
-    description: "Healthy...and green...",
-    price: 18.99,
-  },
-];
 
 const AvailableMeals = () => {
-  const mealsList = DUMMY_MEALS.map((meal) => (
-    <MealItem
-      key={meal.id}
-      id={meal.id}
-      name={meal.name}
-      description={meal.description}
-      price={meal.price}
-    />
-  ));
+  const {
+    data : meals,
+    isLoading : isLoading,
+    error : error,
+    sendRequest
+  } = useHttp();
+
+  useEffect(() => {
+    sendRequest('meals');
+  }, []);
+
+  const mealsList = meals
+    ? Object.keys(meals).map((id) => (
+      <MealItem
+        key={id}
+        id={id}
+        name={meals[id].name}
+        description={meals[id].description}
+        price={meals[id].price}
+      />))
+    : null
+
+  if (isLoading) {
+    return (
+      <section className={classes.MealsLoading}>
+        <p>Loading...</p>
+      </section>
+    )
+  }
+
+  if (error) {
+    return (
+      <section className={classes.MealsError}>
+        <p>{error}</p>
+      </section>
+    )
+  }
 
   return (
     <section className={classes.meals}>
       <Card>
-        <ul> {mealsList} </ul>
+        <ul>
+          {mealsList}
+        </ul>
       </Card>
     </section>
   );
