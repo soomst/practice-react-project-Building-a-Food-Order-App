@@ -9,14 +9,14 @@ import useHttp from "../../hooks/use-http";
 const AvailableMeals = () => {
   const {
     data : meals,
-    isLoading : isLoading,
-    error : error,
+    isLoading,
+    error,
     sendRequest
   } = useHttp();
 
   useEffect(() => {
     sendRequest('meals');
-  }, []);
+  }, [sendRequest]);
 
   const mealsList = meals
     ? Object.keys(meals).map((id) => (

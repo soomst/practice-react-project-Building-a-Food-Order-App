@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useCallback, useReducer } from "react";
 
 const initialState = {isLoading: false, data: null, error: false}
 const stateReducer = (state, action) => {
@@ -9,15 +9,15 @@ const stateReducer = (state, action) => {
             return {isLoading: false, data: null, error: action.errorMessage}
         case 'SUCCESS' :
             return {isLoading: false, data: action.data, error: false}
+        default : 
+            return initialState
     }
-
-    return initialState
 }
 
 const useHttp = () => {
     const [state, dispatchState] = useReducer(stateReducer, initialState)
 
-    const sendRequest = async (url, options) => {
+    const sendRequest = useCallback(async (url, options) => {
         dispatchState({type:'LOADING'})
         try {
           const response = await fetch(`https://react-http-42cd7-default-rtdb.firebaseio.com/${url}.json`, options);
@@ -29,10 +29,12 @@ const useHttp = () => {
     
           const data = await response.json();
           dispatchState({type:'SUCCESS', data: data})
+
+          return data
         } catch (e) {
             dispatchState({type:'ERROR', errorMessage: e.message})
         }
-      };
+      }, []);
 
       return {
           data : state.data,
